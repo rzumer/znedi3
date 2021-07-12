@@ -5,7 +5,7 @@
 #include <stdexcept>
 #include <utility>
 #include <vector>
-#include <znedi3.h>
+#include "../znedi3/znedi3.h"
 #include "vsxx_pluginmain.h"
 
 using namespace vsxx;
