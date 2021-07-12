@@ -1,3 +1,5 @@
+PREFIX ?= /usr/local
+
 MY_CFLAGS := -O2 -fPIC $(CFLAGS)
 MY_CXXFLAGS := -std=c++14 -O2 -fPIC $(CXXFLAGS)
 MY_CPPFLAGS := -Iznedi3 -Ivsxx $(CPPFLAGS)
@@ -66,13 +68,27 @@ ifeq ($(X86_AVX512), 1)
   MY_CPPFLAGS := -DZNEDI3_X86_AVX512 $(MY_CPPFLAGS)
 endif
 
-all: vsznedi3.so
+all: libznedi3.so
 
 testapp/testapp: $(testapp_OBJS) $(znedi3_OBJS)
 	$(CXX) $(MY_LDFLAGS) $^ $(MY_LIBS) -o $@
 
+libznedi3.so: $(znedi3_OBJS)
+	$(CXX) -shared $(MY_LDFLAGS) $^ $(MY_LIBS) -o $@
+
 vsznedi3.so: vsznedi3/vsznedi3.o vsxx/vsxx_pluginmain.o $(znedi3_OBJS)
 	$(CXX) -shared $(MY_LDFLAGS) $^ $(MY_LIBS) -o $@
+
+install: all
+	install -d $(PREFIX)/lib $(PREFIX)/include
+	install libznedi3.so $(PREFIX)/lib
+	install znedi3/znedi3.h $(PREFIX)/include
+	install nnedi3_weights.bin $(PREFIX)/share
+
+uninstall:
+	@rm -fv $(PREFIX)/lib/libznedi3.so
+	@rm -fv $(PREFIX)/include/znedi3.h
+	@rm -fv $(PREFIX)/share/nnedi3_weights.bin
 
 clean:
 	rm -f *.a *.o *.so testapp/testapp testapp/*.o znedi3/*.o znedi3/x86/*.o vsznedi3/*.o vsxx/*.o
